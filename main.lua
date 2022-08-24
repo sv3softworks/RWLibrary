@@ -79,7 +79,7 @@ function Library.new(properties)
             if typeof(tbl.Window[index]) == 'function' and not table.find(IgnoreStrings, index) then
                 return function(Library, properties)
                     properties.type = index
-                    return Library:Add(properties)
+                    return Library:__Add(properties)
                 end
             end
             return tbl.Window[index]
@@ -89,7 +89,8 @@ function Library.new(properties)
     return object
 end
 
-function Library:Add(properties)
+function Library:__Add(properties)
+    assert(typeof(properties) == 'table', "Properties is not a table.")
     assert(properties.type, "Object Type not provided.")
     local object = self.Window[properties.type](self.Window, properties.title)
     
@@ -113,5 +114,6 @@ function Library.With(item, func)
         warn(debug.traceback(e))
     end
 end
+
 
 return Library
