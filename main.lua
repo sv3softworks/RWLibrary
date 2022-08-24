@@ -113,13 +113,3 @@ function Library.With(item, func)
         warn(debug.traceback(e))
     end
 end
-
-
-Library.With(Library.new({}), function(Library)
-    --print(Library.__super and Library.__super.properties.title)
-    Library.colors.WindowBg = {Color3.new(0,0,0), 0.5}
-    Library:Button({Label = "test"})
-end)
-
-task.wait(5)
-Window = nil
