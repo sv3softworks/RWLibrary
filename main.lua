@@ -63,7 +63,7 @@ function Library.new(properties)
             assert(typeof(value) == "table" or value[1] == nil, "Value is not a dictionary!")
             assert(RenderStyleOption[index], string.format("Invalid String Type! Got %s", index))
             rawset(tbl, index, value)
-            self.Window:SetStyle(RenderColorOption[index], value[1], value[2])
+            self.Window:SetStyle(RenderStyleOption[index], value[1], value[2])
         end
     })
     --object.OnFlagChanged = Signal.new()
@@ -90,7 +90,6 @@ function Library.new(properties)
 end
 
 function Library:__Add(properties)
-    assert(typeof(properties) == 'table', "Properties is not a table.")
     assert(properties.type, "Object Type not provided.")
     local object = self.Window[properties.type](self.Window, properties.title)
     
