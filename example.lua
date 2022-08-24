@@ -1,7 +1,12 @@
 local lib = syn.request({ Url = "https://raw.githubusercontent.com/sv3softworks/RWLibrary/main/main.lua" }).Body
 local Library = loadstring(lib)()
+local Window = Library.new({Size = Vector2.new(600,400)})
+if getgenv().Window then
+    table.clear(getgenv().Window)
+end
+getgenv().Window = Window
 
-Library.With(Library.new({}), function(Library)
+Library.With(Window, function(Library)
     Library.colors.WindowBg = {Color3.new(0,0,0), 0.5}
     Library:Button({Label = "test"})
     Library.With(Library:TabMenu({}), function(Library)
@@ -13,3 +18,4 @@ end)
 
 task.wait(15)
 Window = nil
+getgenv().Window = nil
