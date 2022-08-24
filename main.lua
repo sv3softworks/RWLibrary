@@ -113,3 +113,5 @@ function Library.With(item, func)
         warn(debug.traceback(e))
     end
 end
+
+return Library
