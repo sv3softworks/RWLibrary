@@ -60,16 +60,17 @@ function Library.new(properties)
     })
     self.styles = setmetatable({}, {
         __newindex = function(tbl, index, value)
-            assert(typeof(value) == "table" or value[1] == nil, "Value is not a dictionary!")
+            assert(value, "Value is nil.")
             assert(RenderStyleOption[index], string.format("Invalid String Type! Got %s", index))
             rawset(tbl, index, value)
-            self.Window:SetStyle(RenderStyleOption[index], value[1], value[2])
+            self.Window:SetStyle(RenderStyleOption[index], value)
         end
     })
     --object.OnFlagChanged = Signal.new()
     self.properties = properties
     if parent.SubLibrary then
         self.__super = parent
+        self.flags = self.__super.flags
     end
     local object = setmetatable(self, {__index = function(tbl, index)
         if Library[index] then
@@ -77,7 +78,16 @@ function Library.new(properties)
         end
         if tbl.Window[index] then
             if typeof(tbl.Window[index]) == 'function' and not table.find(IgnoreStrings, index) then
-                return function(Library, properties)
+                return function(Library, ...)
+                    local args = {...}
+                    local properties = {}
+                    for i,v in args do
+                        if type(v) == 'table' then
+                            for m,n in v do
+                                properties[m] = n
+                            end
+                        end
+                    end
                     properties.type = index
                     return Library:__Add(properties)
                 end
@@ -113,6 +123,5 @@ function Library.With(item, func)
         warn(debug.traceback(e))
     end
 end
-
 
 return Library
