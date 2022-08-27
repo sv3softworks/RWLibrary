@@ -50,6 +50,7 @@ function Library.new(properties)
     self.Window = Window
     self.SubLibrary = {}
     self.flags = {}
+    self.Children = {}
     self.colors = setmetatable({}, {
         __newindex = function(tbl, index, value)
             assert(typeof(value) == "table" or value[1] == nil, "Value is not a dictionary!")
@@ -89,7 +90,9 @@ function Library.new(properties)
                         end
                     end
                     properties.type = index
-                    return Library:__Add(properties)
+                    local new = Library:__Add(properties)
+                    table.insert(self.Children, new)
+                    return new
                 end
             end
             return tbl.Window[index]
@@ -105,11 +108,21 @@ function Library:__Add(properties)
     
     for i,v in pairs(properties) do
         pcall(function()
-            object[i] = v
+            if type(v) ~= "function" then
+                object[i] = v
+            else
+                object[i]:Connect(function(...)
+                    v(object, ...)
+                end)
+            end
         end)
     end
 
     return object
+end
+
+function Library:Clear()
+    self.Window:Clear()
 end
 
 function Library.With(item, func)
@@ -122,6 +135,7 @@ function Library.With(item, func)
     if not s then
         warn(debug.traceback(e))
     end
+    return item
 end
 
 return Library
