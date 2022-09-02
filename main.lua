@@ -129,8 +129,6 @@ function Library.With(item, func)
     if not item.SubLibrary then
         item = Library.new({__window=item})
     end
-    local oldEnv = getgenv(func)
-    oldEnv.Library = item
     local s,e = pcall(func, item)
     if not s then
         warn(debug.traceback(e))
