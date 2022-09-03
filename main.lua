@@ -34,7 +34,7 @@ local IgnoreStrings = {
 }
 Library.__index = Library
 
-function Library.new(properties)
+function Library:new(properties)
     local Window = properties.__window or RenderWindow.new(properties.title or properties.tag or game.HttpService:GenerateGUID())
     for i,v in properties do
         local s = pcall(function()
@@ -42,9 +42,11 @@ function Library.new(properties)
         end)
     end
 
-    local parent = Library
+    local parent = self
     local self = {}
 
+    local colors = {} --real table, the one exposed is a proxy
+    local styles = {} --real table, the one exposed is a proxy.
     self.title = ""
     self.tag = ""
     self.Window = Window
@@ -55,25 +57,34 @@ function Library.new(properties)
         __newindex = function(tbl, index, value)
             assert(typeof(value) == "table" or value[1] == nil, "Value is not a dictionary!")
             assert(RenderColorOption[index], string.format("Invalid String Type! Got %s", index))
-            rawset(tbl, index, value)
+            colors[index] = value
             self.Window:SetColor(RenderColorOption[index], value[1], value[2])
-        end
+        end, __index = colors
     })
     self.styles = setmetatable({}, {
         __newindex = function(tbl, index, value)
             assert(value, "Value is nil.")
             assert(RenderStyleOption[index], string.format("Invalid String Type! Got %s", index))
-            rawset(tbl, index, value)
+            styles[index] = value
             self.Window:SetStyle(RenderStyleOption[index], value)
-        end
+        end, __index = styles
     })
     --object.OnFlagChanged = Signal.new()
     self.properties = properties
-    if parent.SubLibrary then
+    if parent.Children then
         self.__super = parent
         self.flags = self.__super.flags
     end
-    local object = setmetatable(self, {__index = function(tbl, index)
+    local object = setmetatable(self, {
+        __newindex = function(tbl, index, value)
+            if index == "colors" or index == "styles" then
+                for i,v in pairs(value) do
+                    self[index][i] = v
+                end
+            end
+            rawset(tbl, index, value)
+        end,
+        __index = function(tbl, index)
         if Library[index] then
             return Library[index]
         end
@@ -106,7 +117,7 @@ function Library:__Add(properties)
     assert(properties.type, "Object Type not provided.")
     local object = self.Window[properties.type](self.Window, properties.title)
     
-    for i,v in pairs(properties) do
+    for i,v in properties do
         pcall(function()
             if type(v) ~= "function" then
                 object[i] = v
@@ -117,6 +128,19 @@ function Library:__Add(properties)
             end
         end)
     end
+    pcall(function()
+        local flagName = properties.tag or properties.title or properties.Label
+        if Window.flags[flagName] == nil then
+            Window.flags[flagName] = object.Value
+        else
+            object.Value = Window.flags[flagName]
+        end
+        object.OnUpdated:Connect(function(...)
+            local args = {...}
+            Window.flags[flagName] = #args > 1 and args or args[1]
+            
+        end)
+    end)
 
     return object
 end
@@ -125,9 +149,14 @@ function Library:Clear()
     self.Window:Clear()
 end
 
+function Library:Destroy()
+    self:Clear()
+    table.clear(self)
+end
+
 function Library.With(item, func)
     if not item.SubLibrary then
-        item = Library.new({__window=item})
+        item = Library:new({__window=item})
     end
     local s,e = pcall(func, item)
     if not s then
