@@ -1,6 +1,6 @@
 local lib = syn.request({ Url = "https://raw.githubusercontent.com/sv3softworks/RWLibrary/main/main.lua" }).Body
 local Library = loadstring(lib)()
-local Window = Library.new({Size = Vector2.new(600,400)})
+local Window, Flags = Library.new({Size = Vector2.new(600,400)})
 if getgenv().Window then
     table.clear(getgenv().Window)
 end
