@@ -35,6 +35,7 @@ local IgnoreStrings = {
 Library.__index = Library
 
 function Library:new(properties)
+    properties = properties or {}
     local Window = properties.__window or RenderWindow.new(properties.title or properties.tag or game.HttpService:GenerateGUID())
     for i,v in properties do
         local s = pcall(function()
