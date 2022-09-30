@@ -23,7 +23,6 @@ end
 
 local Library = {}
 local Context = {}
-local Flags = {}
 local IgnoreStrings = {
     'Clear',
     'SetStyle',
@@ -52,7 +51,7 @@ function Library:new(properties)
     self.tag = ""
     self.Window = Window
     self.SubLibrary = {}
-    self.flags = Flags
+    self.flags = {}
     self.Children = {}
     self.colors = setmetatable({}, {
         __newindex = function(tbl, index, value)
@@ -74,6 +73,7 @@ function Library:new(properties)
     self.properties = properties
     if parent.Children then
         self.__super = parent
+        self.flags = self.__super.flags
     end
     local object = setmetatable(self, {
         __newindex = function(tbl, index, value)
